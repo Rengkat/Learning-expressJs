@@ -14,7 +14,33 @@ app.get("/new-index(.html)?", (req, res) => {
 app.get("/old-html(.html)?", (req, res) => {
   res.redirect(301, "./new-index.html");
 });
-//falback route
+
+//route handler
+app.get(
+  "/new-site(.html)?",
+  (req, res, next) => {
+    console.log("Attempt to load New-index.html");
+    next();
+  },
+  (req, res) => {
+    res.send("Hello world");
+  }
+);
+//using chaining
+const one = (req, res, next) => {
+  console.log("One");
+  next();
+};
+const two = (req, res, next) => {
+  console.log("two");
+  next();
+};
+const three = (req, res, next) => {
+  console.log("three");
+  res.send("Finish");
+};
+app.get("/chaining(.html)?", [one, two, three]);
+//fallback route
 app.get("/*", (req, res) => {
   res.status(400).sendFile(path.join(__dirname, "./404.html"));
 });
