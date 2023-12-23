@@ -21,7 +21,7 @@ app.get("/api/courses/:id", (req, res) => {
   if (course) {
     res.send(course);
   } else {
-    res.status(404).send(`course with id of ${req.params.id} is not found`);
+    return res.status(404).send(`course with id of ${req.params.id} is not found`);
   }
 });
 app.post("/api/courses", (req, res) => {
@@ -32,8 +32,7 @@ app.post("/api/courses", (req, res) => {
   //   console.log(result);
   if (!req.body.name || req.body.name.length < 3) {
     //send res with status 400: bad req
-    res.status(400).send("Please enter a valid name");
-    return;
+    return res.status(400).send("Please enter a valid name");
   }
   const course = {
     id: courses.length + 1,
@@ -49,17 +48,28 @@ app.put("/api/course/:id", (req, res) => {
 
   //check if it exist in the courses
   if (!course) {
-    res.status(400).send("Course not exist");
+    return res.status(400).send("Course not exist");
   }
   //validate
   if (!req.body.name || req.body.name.length < 3) {
     //send res with status 400: bad req
-    res.status(400).send("Please enter a valid name");
-    return;
+    return res.status(400).send("Please enter a valid name");
   }
 
   // update
   course.name = req.body.name;
+  res.send(course);
+});
+//delete
+app.delete("/api/courses/:id", (req, res) => {
+  //get the specific course
+  const course = courses.find((c) => c.id === Number(req.params.id));
+  if (!course) {
+    return res.status(404).send("Course not found");
+  }
+  //get course using index
+  const index = course.indexOf(course);
+  course.splice(index, 1);
   res.send(course);
 });
 app.listen(PORT, () => console.log(`Listing on port ${PORT}`));
