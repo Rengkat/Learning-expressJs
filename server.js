@@ -1,47 +1,34 @@
-const path = require("node:path");
 const express = require("express");
-const PORT = process.env.PORT || 3000;
 const app = express();
-// ^/$|/index(.html)? regex for when starts with / or index with or without .html extension
-app.get("^/$|/index(.html)?", (req, res) => {
-  //   res.sendFile("./index.html", { root: __dirname });
-  res.sendFile(path.join(__dirname, "index.html"));
+const PORT = process.env.PORT || 3000;
+const courses = [
+  { id: 1, course: "course1" },
+  { id: 2, course: "course2" },
+  { id: 3, course: "course3" },
+];
+//create a middleware for the json
+app.use(express.json());
+app.get("/", (req, res) => {
+  res.send("Hello world");
 });
-//regex (.html)? means with or without the extension .html
-app.get("/new-index(.html)?", (req, res) => {
-  res.sendFile(path.join(__dirname, "new-index.html"));
+app.get("/api/courses", (req, res) => {
+  res.send(courses);
 });
-app.get("/old-html(.html)?", (req, res) => {
-  res.redirect(301, "./new-index.html");
-});
-
-//route handler
-app.get(
-  "/new-site(.html)?",
-  (req, res, next) => {
-    console.log("Attempt to load New-index.html");
-    next();
-  },
-  (req, res) => {
-    res.send("Hello world");
+//getting one course
+app.get("/api/courses/:id", (req, res) => {
+  const course = courses.find((c) => c.id === Number(req.params.id));
+  if (course) {
+    res.send(course);
+  } else {
+    res.status(404).send(`course with id of ${req.params.id} is not found`);
   }
-);
-//using chaining
-const one = (req, res, next) => {
-  console.log("One");
-  next();
-};
-const two = (req, res, next) => {
-  console.log("two");
-  next();
-};
-const three = (req, res, next) => {
-  console.log("three");
-  res.send("Finish");
-};
-app.get("/chaining(.html)?", [one, two, three]);
-//fallback route
-app.get("/*", (req, res) => {
-  res.status(400).sendFile(path.join(__dirname, "./404.html"));
 });
-app.listen(PORT, () => console.log(`Server running at port ${PORT}`));
+app.post("/api/courses", (req, res) => {
+  const course = {
+    id: courses.length + 1,
+    course: req.body.course,
+  };
+  courses.push(course);
+  res.send(course);
+});
+app.listen(PORT, () => console.log(`Listing on port ${PORT}`));
